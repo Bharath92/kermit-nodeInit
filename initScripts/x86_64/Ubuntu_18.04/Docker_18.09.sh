@@ -357,9 +357,6 @@ main() {
     exec_grp "fetch_reports_binary"
 
     trap before_exit EXIT
-    exec_grp "pull_reqProc"
-
-    trap before_exit EXIT
     exec_grp "fetch_reqKick"
 
     trap before_exit EXIT
