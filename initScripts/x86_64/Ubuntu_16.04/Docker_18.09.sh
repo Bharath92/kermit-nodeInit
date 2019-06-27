@@ -250,12 +250,6 @@ fetch_reports_binary() {
   popd
 }
 
-pull_reqProc() {
-  __process_marker "Pulling reqProc..."
-
-  docker pull $EXEC_IMAGE
-}
-
 fetch_reqKick() {
   __process_marker "Fetching reqKick..."
   local reqKick_tar_file="reqKick.tar.gz"
@@ -358,9 +352,6 @@ main() {
 
     trap before_exit EXIT
     exec_grp "fetch_reports_binary"
-
-    trap before_exit EXIT
-    exec_grp "pull_reqProc"
 
     trap before_exit EXIT
     exec_grp "fetch_reqKick"

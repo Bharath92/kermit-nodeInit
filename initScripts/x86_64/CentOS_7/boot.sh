@@ -46,9 +46,8 @@ export_envs() {
   export EXECTEMPLATES_DIR="$BASE_DIR/execTemplates"
   export REQEXEC_BIN_PATH="$REQEXEC_DIR/dist/main/main"
   export REQKICK_DIR="$BASE_DIR/reqKick"
-  export REQKICK_SERVICE_DIR="$REQKICK_DIR/init/$NODE_ARCHITECTURE/$NODE_OPERATING_SYSTEM"
+  export REQKICK_SERVICE_DIR="$REQKICK_DIR/helpers/templates/service/init/$NODE_ARCHITECTURE/$NODE_OPERATING_SYSTEM"
   export REQKICK_CONFIG_DIR="$BASE_DIR/config"
-  export STATUS_DIR="$BASE_DIR/status"
   # This is set while booting dynamic nodes
   export REQPROC_MOUNTS="$REQPROC_MOUNTS"
   export REQPROC_ENVS="$REQPROC_ENVS"
@@ -70,74 +69,6 @@ setup_dirs() {
 initialize() {
   __process_marker "Initializing node..."
   source $NODE_INIT_SCRIPT
-}
-
-setup_mounts() {
-  REQPROC_MOUNTS="$REQPROC_MOUNTS \
-    -v $BASE_DIR:$BASE_DIR \
-    -v /opt/docker/docker:/usr/bin/docker \
-    -v /var/run/docker.sock:/var/run/docker.sock"
-}
-
-setup_envs() {
-  REQPROC_ENVS="$REQPROC_ENVS \
-    -e SHIPPABLE_AMQP_URL=$SHIPPABLE_AMQP_URL \
-    -e SHIPPABLE_AMQP_DEFAULT_EXCHANGE=$SHIPPABLE_AMQP_DEFAULT_EXCHANGE \
-    -e SHIPPABLE_API_URL=$SHIPPABLE_API_URL \
-    -e SHIPPABLE_WWW_URL=$SHIPPABLE_WWW_URL \
-    -e LISTEN_QUEUE=$LISTEN_QUEUE \
-    -e NODE_ID=$NODE_ID \
-    -e RUN_MODE=$RUN_MODE \
-    -e SUBSCRIPTION_ID=$SUBSCRIPTION_ID \
-    -e NODE_TYPE_CODE=$NODE_TYPE_CODE \
-    -e BASE_DIR=$BASE_DIR \
-    -e REQPROC_DIR=$REQPROC_DIR \
-    -e REQEXEC_DIR=$REQEXEC_DIR \
-    -e REQEXEC_BIN_DIR=$REQEXEC_BIN_DIR \
-    -e REQKICK_DIR=$REQKICK_DIR \
-    -e BUILD_DIR=$BUILD_DIR \
-    -e REQPROC_CONTAINER_NAME=$REQPROC_CONTAINER_NAME \
-    -e DEFAULT_TASK_CONTAINER_MOUNTS='$DEFAULT_TASK_CONTAINER_MOUNTS' \
-    -e TASK_CONTAINER_COMMAND=$TASK_CONTAINER_COMMAND \
-    -e DEFAULT_TASK_CONTAINER_OPTIONS='$DEFAULT_TASK_CONTAINER_OPTIONS' \
-    -e EXEC_IMAGE=$EXEC_IMAGE \
-    -e SHIPPABLE_DOCKER_VERSION=$DOCKER_VERSION \
-    -e IS_DOCKER_LEGACY=false \
-    -e SHIPPABLE_NODE_ARCHITECTURE=$NODE_ARCHITECTURE \
-    -e SHIPPABLE_NODE_OPERATING_SYSTEM=$NODE_OPERATING_SYSTEM \
-    -e SHIPPABLE_RELEASE_VERSION=$SHIPPABLE_RELEASE_VERSION \
-    -e SHIPPABLE_RUNTIME_VERSION=$SHIPPABLE_RUNTIME_VERSION \
-    -e SHIPPABLE_NODE_SCRIPTS_LOCATION=$NODE_SCRIPTS_LOCATION \
-    -e CLUSTER_TYPE_CODE=$CLUSTER_TYPE_CODE \
-    -e IS_RESTRICTED_NODE=$IS_RESTRICTED_NODE"
-
-  if [ ! -z "$SHIPPABLE_HTTP_PROXY" ]; then
-    REQPROC_ENVS="$REQPROC_ENVS \
-      -e http_proxy=$SHIPPABLE_HTTP_PROXY"
-  fi
-
-  if [ ! -z "$SHIPPABLE_HTTPS_PROXY" ]; then
-    REQPROC_ENVS="$REQPROC_ENVS \
-      -e https_proxy=$SHIPPABLE_HTTPS_PROXY"
-  fi
-
-  if [ ! -z "$SHIPPABLE_NO_PROXY" ]; then
-    REQPROC_ENVS="$REQPROC_ENVS \
-      -e no_proxy=$SHIPPABLE_NO_PROXY"
-  fi
-
-  if [ "$NO_VERIFY_SSL" == "true" ]; then
-    REQPROC_ENVS="$REQPROC_ENVS \
-      -e NODE_TLS_REJECT_UNAUTHORIZED=0"
-  fi
-}
-
-setup_opts() {
-  REQPROC_OPTS="$REQPROC_OPTS \
-    -d \
-    --restart=always \
-    --name=$REQPROC_CONTAINER_NAME \
-    "
 }
 
 remove_reqProc() {
@@ -181,8 +112,7 @@ boot_reqKick() {
   local reqkick_env_template=$REQKICK_SERVICE_DIR/$REQKICK_SERVICE_NAME.env.template
   local reqkick_env_file=$REQKICK_CONFIG_DIR/reqKick.env
   touch $reqkick_env_file
-  sed "s#{{STATUS_DIR}}#$STATUS_DIR#g" $reqkick_env_template > $reqkick_env_file
-  sed -i "s#{{REQEXEC_BIN_PATH}}#$REQEXEC_BIN_PATH#g" $reqkick_env_file
+  sed "s#{{REQEXEC_BIN_PATH}}#$REQEXEC_BIN_PATH#g" $reqkick_env_template > $reqkick_env_file
   sed -i "s#{{RUN_MODE}}#$RUN_MODE#g" $reqkick_env_file
   sed -i "s#{{NODE_ID}}#$NODE_ID#g" $reqkick_env_file
   sed -i "s#{{PROJECT_ID}}#$PROJECT_ID#g" $reqkick_env_file
@@ -191,6 +121,13 @@ boot_reqKick() {
   sed -i "s#{{SHIPPABLE_NODE_OPERATING_SYSTEM}}#$NODE_OPERATING_SYSTEM#g" $reqkick_env_file
   sed -i "s#{{SHIPPABLE_API_URL}}#$SHIPPABLE_API_URL#g" $reqkick_env_file
   sed -i "s#{{EXECTEMPLATES_DIR}}#$EXECTEMPLATES_DIR#g" $reqkick_env_file
+  sed -i "s#{{LISTEN_QUEUE}}#$LISTEN_QUEUE#g" $reqkick_env_file
+  sed -i "s#{{SHIPPABLE_AMQP_URL}}#$SHIPPABLE_AMQP_URL#g" $reqkick_env_file
+  sed -i "s#{{BASE_DIR}}#$BASE_DIR#g" $reqkick_env_file
+  sed -i "s#{{SHIPPABLE_RUNTIME_VERSION}}#$SHIPPABLE_RUNTIME_VERSION#g" $reqkick_env_file
+  sed -i "s#{{SHIPPABLE_RELEASE_VERSION}}#$SHIPPABLE_RELEASE_VERSION#g" $reqkick_env_file
+  sed -i "s#{{SHIPPABLE_WWW_URL}}#$SHIPPABLE_WWW_URL#g" $reqkick_env_file
+  sed -i "s#{{REQEXEC_DIR}}#$REQEXEC_DIR#g" $reqkick_env_file
 
   systemctl daemon-reload
   systemctl enable $REQKICK_SERVICE_NAME.service
@@ -206,13 +143,6 @@ boot_reqKick() {
     popd
     exit 1
   }
-}
-
-boot_reqProc() {
-  __process_marker "Booting up reqProc..."
-
-  local start_cmd="docker run $REQPROC_OPTS $REQPROC_MOUNTS $REQPROC_ENVS $EXEC_IMAGE"
-  eval "$start_cmd"
 }
 
 cleanup() {
@@ -242,15 +172,6 @@ main() {
   fi
 
   trap before_exit EXIT
-  exec_grp "setup_mounts"
-
-  trap before_exit EXIT
-  exec_grp "setup_envs"
-
-  trap before_exit EXIT
-  exec_grp "setup_opts"
-
-  trap before_exit EXIT
   exec_grp "remove_reqProc"
 
   trap before_exit EXIT
@@ -258,9 +179,6 @@ main() {
 
   trap before_exit EXIT
   exec_grp "boot_reqKick"
-
-  trap before_exit EXIT
-  exec_grp "boot_reqProc"
 
   trap before_exit EXIT
   exec_grp "cleanup"
