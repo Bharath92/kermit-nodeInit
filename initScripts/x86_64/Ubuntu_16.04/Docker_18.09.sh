@@ -27,6 +27,10 @@ check_init_input() {
     'IS_SWAP_ENABLED'
     'REQKICK_DOWNLOAD_URL'
     'REPORTS_DOWNLOAD_URL'
+    'EXECTEMPLATES_DIR'
+    'REQEXEC_DIR'
+    'EXECTEMPLATES_DOWNLOAD_URL'
+    'REQEXEC_DOWNLOAD_URL'
   )
 
   check_envs "${expected_envs[@]}"
@@ -246,12 +250,6 @@ fetch_reports_binary() {
   popd
 }
 
-pull_reqProc() {
-  __process_marker "Pulling reqProc..."
-
-  docker pull $EXEC_IMAGE
-}
-
 fetch_reqKick() {
   __process_marker "Fetching reqKick..."
   local reqKick_tar_file="reqKick.tar.gz"
@@ -266,6 +264,33 @@ fetch_reqKick() {
   popd
   pushd $REQKICK_DIR
     npm install
+  popd
+}
+
+fetch_reqExec_binary() {
+  __process_marker "Fetching reqExec binary..."
+
+  local reqExec_tar_file="reqExec.tar.gz"
+  rm -rf $REQEXEC_DIR
+  mkdir -p $REQEXEC_DIR
+  pushd $REQEXEC_DIR
+    wget $REQEXEC_DOWNLOAD_URL -O $reqExec_tar_file
+    tar -xf $reqExec_tar_file
+    rm -rf $reqExec_tar_file
+  popd
+}
+
+fetch_execTemplates() {
+  __process_marker "Fetching execTemplates..."
+  local execTemplates_tar_file="execTemplates.tar.gz"
+
+  rm -rf $EXECTEMPLATES_DIR
+  rm -rf $execTemplates_tar_file
+  pushd /tmp
+    wget $EXECTEMPLATES_DOWNLOAD_URL -O $execTemplates_tar_file
+    mkdir -p $EXECTEMPLATES_DIR
+    tar -xzf $execTemplates_tar_file -C $EXECTEMPLATES_DIR --strip-components=1
+    rm -rf $execTemplates_tar_file
   popd
 }
 
@@ -329,10 +354,13 @@ main() {
     exec_grp "fetch_reports_binary"
 
     trap before_exit EXIT
-    exec_grp "pull_reqProc"
+    exec_grp "fetch_reqKick"
 
     trap before_exit EXIT
-    exec_grp "fetch_reqKick"
+    exec_grp "fetch_reqExec_binary"
+
+    trap before_exit EXIT
+    exec_grp "fetch_execTemplates"
   fi
 }
 
