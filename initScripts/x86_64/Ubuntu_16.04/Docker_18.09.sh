@@ -18,11 +18,6 @@ fi
 
 check_init_input() {
   local expected_envs=(
-    'NODE_ARCHITECTURE'
-    'NODE_OPERATING_SYSTEM'
-    'SHIPPABLE_RELEASE_VERSION'
-    'SHIPPABLE_RUNTIME_VERSION'
-    'EXEC_IMAGE'
     'REQKICK_DIR'
     'IS_SWAP_ENABLED'
     'REQKICK_DOWNLOAD_URL'
