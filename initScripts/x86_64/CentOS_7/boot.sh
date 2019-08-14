@@ -20,7 +20,6 @@ source "$NODE_LIB_DIR/helpers.sh"
 
 check_input() {
   local expected_envs=(
-    'EXEC_IMAGE'
     'LISTEN_QUEUE'
     'NODE_ARCHITECTURE'
     'NODE_ID'

@@ -20,7 +20,6 @@ source "$NODE_LIB_DIR/helpers.sh"
 
 check_input() {
   local expected_envs=(
-    'EXEC_IMAGE'
     'LISTEN_QUEUE'
     'NODE_ARCHITECTURE'
     'NODE_ID'
@@ -143,13 +142,6 @@ boot_reqKick() {
     popd
     exit 1
   }
-}
-
-boot_reqProc() {
-  __process_marker "Booting up reqProc..."
-
-  local start_cmd="docker run $REQPROC_OPTS $REQPROC_MOUNTS $REQPROC_ENVS $EXEC_IMAGE"
-  eval "$start_cmd"
 }
 
 cleanup() {
